@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VXNET - DAR | Configuration</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        nav {
+            background-color: #333;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-links {
+            list-style-type: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links li {
+            display: inline;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a hover {
+            color: #4caf50;
+        }
+
+        .content {
+            margin-top: 60px;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        .field {
+            margin-bottom: 15px;
+        }
+        .field label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .field input {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">VXNET</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/status">Status</a></li>
+                <li><a href="/configuration">Configuration</a></li>
+            </ul>    
+        </div>
+    </nav>
+    <div class="content">
+        <h1>Discord Auto Responder | Configuration</h1>
+    </div>
+
+
+    <div class="container">
+        <h1>Configuration</h1>
+        <form id="config-form"></form>
+        <button id="apply-changes">Apply Changes</button>
+    </div>
+
+    <script>
+        // Utility function to create form fields dynamically
+        function createField(name, value, parent) {
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'field';
+
+            const label = document.createElement('label');
+            label.textContent = name;
+
+            let input;
+            if (typeof value === 'object') {
+                input = document.createElement('div');
+                input.style.marginLeft = '10px';
+                Object.keys(value).forEach((key) => {
+                    createField(`${name}.${key}`, value[key], input);
+                });
+            } else {
+                input = document.createElement('input');
+                input.type = typeof value === 'number' ? 'number' : 'text';
+                input.value = value;
+                input.name = name;
+            }
+
+            fieldDiv.appendChild(label);
+            fieldDiv.appendChild(input);
+            parent.appendChild(fieldDiv);
+        }
+
+        // Function to populate the form with JSON data
+        async function loadConfig() {
+            const response = await fetch('/get-config');
+            const data = await response.json();
+
+            const form = document.getElementById('config-form');
+            form.innerHTML = ''; // Clear previous form content
+            Object.keys(data).forEach((key) => {
+                createField(key, data[key], form);
+            });
+        }
+
+        // Function to convert form data back to JSON
+        function formToJson(form) {
+            const json = {};
+            Array.from(form.querySelectorAll('input')).forEach((input) => {
+                const keys = input.name.split('.');
+                let ref = json;
+                for (let i = 0; i < keys.length - 1; i++) {
+                    ref[keys[i]] = ref[keys[i]] || {};
+                    ref = ref[keys[i]];
+                }
+                ref[keys[keys.length - 1]] = isNaN(input.value) 
+                    ? input.value === 'true' ? true 
+                    : input.value === 'false' ? false 
+                    : input.value 
+                    : parseFloat(input.value);
+            });
+            return json;
+        }
+
+        // Save the updated configuration to the server
+        async function saveConfig() {
+            const form = document.getElementById('config-form');
+            const updatedConfig = formToJson(form);
+
+            try {
+                const response = await fetch('/save-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(updatedConfig),
+                });
+                const result = await response.json();
+                alert(result.message);
+            } catch (error) {
+                alert('Failed to save configuration: ' + error.message);
+            }
+        }
+
+        // Load configuration on page load
+        window.onload = loadConfig;
+
+        // Add event listener to "Apply Changes" button
+        document.getElementById('apply-changes').addEventListener('click', saveConfig);
+    </script>
+
+
+</head>
+<body>
+    
+</body>
+</html>

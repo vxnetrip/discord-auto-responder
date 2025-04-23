@@ -1,0 +1,10 @@
+colorama
+rich
+wmi
+flask
+cryptography
+tls_client
+typing_extensions
+requests
+websockets
+uvicorn

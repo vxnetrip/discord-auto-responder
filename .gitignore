@@ -1,0 +1,8 @@
+**/__pycache__/
+DARconfig/
+venv/
+**/*.exe
+**/*bin
+main.build
+main.dist
+main.onefile-build

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VXNET - DAR | Home</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        .content img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        nav {
+            background-color: #333;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-links {
+            list-style-type: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links li {
+            display: inline;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a hover {
+            color: #4caf50;
+        }
+
+        .content {
+            margin-top: 60px;
+            padding: 20px;
+        }
+
+    </style>
+
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">VXNET</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/status">Status</a></li>
+                <li><a href="/configuration">Configuration</a></li>
+            </ul>    
+        </div>
+    </nav>
+    <div class="content">
+        <h1>Discord Auto Responder</h1>
+        <h2>Control Panel version 0.0.334-alpha</h2>
+
+        <img src="{{ url_for('static', filename='images/DAR_BANNER.png') }}" alt="DAR DAR BANNER">
+
+        <p>Visit <a href="/status">status page</a> to view status of discord auto responder.</p>
+        <p>If you are running program for a first time please <a href="/configuration">configure discord auto responder here.</a></p>
+    </div>
+
+</body>
+</html>

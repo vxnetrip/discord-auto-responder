@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VXNET - DAR | Status</title>
+
+    <style>
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        nav {
+            background-color: #333;
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            padding: 10px 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .nav-logo {
+            font-size: 24px;
+            font-weight: bold;
+            text-decoration: none;
+            color: white;
+        }
+
+        .nav-links {
+            list-style-type: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav-links li {
+            display: inline;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: white;
+            font-size: 16px;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a hover {
+            color: #4caf50;
+        }
+
+        .content {
+            margin-top: 60px;
+            padding: 20px;
+        }
+
+        .start-auto-responder-content p {
+            color: rgb(0, 0, 0);
+            border: 1px 1px solid rgb(0, 0, 0);
+            background-color: #ffffff;
+        }
+
+        .start-auto-responder-content button {
+            background-color: rgb(255, 255, 255);
+            color: rgb(0, 0, 0);
+            border: 2px 2px solid rgb(0, 0, 0);
+            padding: 8px 8px 8px 8px;
+            margin-top: 18px;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">VXNET</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/status">Status</a></li>
+                <li><a href="/configuration">Configuration</a></li>
+            </ul>    
+        </div>
+    </nav>
+    <div class="content">
+        <h1>Discord Auto Responder | Status Page</h1>
+
+        <hr style="border: 1px solid #000000; margin: 20px 0;">
+        <h2 style="color: #ff7474;">Webserver Flask</h2>
+        <p style="color: #006b6b;">REAL TIME STATUS: <strong id="auto-status-flask" style="font-weight: bold; color: purple;">Loading please wait...</strong></p>
+
+
+        <hr style="border: 1px solid #000000; margin: 20px 0;">
+        <h2 style="color: #ff7474;">Discord Auto Responder</h2>
+        <p style="color: #006b6b;">REAL TIME STATUS: <strong id="auto-status-discord-auto-responder" style="font-weight: bold; color: purple;">Loading please wait...</strong></p>
+        <!-- This will be shown when Auto Responder Status is equal to OFF -->
+        <div class="start-auto-responder-content">
+            <p id="auto-responder-close-info" hidden="true">Close main console to kill this task</p>
+            <button id="btn-start-auto-responder" hidden="true" onclick="button_onclick_start_discord_auto_responder()">Start Discord Auto Responder</button>
+        </div>
+        <!-- ------------------------------------------------------------- -->
+
+    </div>
+
+
+
+    <script>
+        function button_onclick_start_discord_auto_responder() {
+            const autoResponderCloseInfo = document.getElementById("auto-responder-close-info");
+            const buttonStartAutoResponder = document.getElementById("btn-start-auto-responder");
+            buttonStartAutoResponder.hidden = true;
+            autoResponderCloseInfo.hidden = false;
+            fetch("/start-auto-responder-thread")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to start responder: " + response.statusText);
+                }
+                return response.json()
+            })
+            .then(data => {
+                return;
+            })
+            .catch(error => {
+                console.error("There was a problem with starting DAR. Please report the problem to owner.", status);
+            })
+
+        }
+
+        // Fetch statuses of services
+        function fetch_auto_responder_status() {
+            fetch("/api/services-status")
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error("Failed to fetch Services Status: " + response.statusText);
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update status in DOM
+
+                let discord_auto_responder_status = String(data["status-discord-auto-responder"]);
+                let flask_status = String(data["status-flask"]);
+                
+                // Flask Webserver status
+                const auto_status_flask_object = document.getElementById("auto-status-flask");
+                auto_status_flask_object.textContent = flask_status;
+                if (flask_status === "OPERATING NORMALLY") {
+                    auto_status_flask_object.style.color = "green";
+                } else if (flask_status === "PENDING") {
+                    auto_status_flask_object.style.color = "yellow";
+                } else if (flask_status.includes("ERROR")) {
+                    auto_status_flask_object.style.color = "red";
+                }
+
+                // Discord Auto Responder status
+                const auto_status_discord_auto_responder = document.getElementById("auto-status-discord-auto-responder");
+                auto_status_discord_auto_responder.textContent = discord_auto_responder_status;
+                if (discord_auto_responder_status === "OPERATING NORMALLY") {
+                    auto_status_flask_object.style.color = "green";
+                } else if (discord_auto_responder_status === "PENDING") {
+                    auto_status_flask_object.style.color = "yellow";
+                } else if (discord_auto_responder_status.includes("ERROR")) {
+                    auto_status_flask_object.style.color = "red";
+                }
+
+                const autoResponderCloseInfo = document.getElementById("auto-responder-close-info");
+                const buttonStartAutoResponder = document.getElementById("btn-start-auto-responder");
+                if (discord_auto_responder_status === "OFF") {
+                    buttonStartAutoResponder.hidden = false;
+                    autoResponderCloseInfo.hidden = true;
+                }
+
+                
+            })
+            .catch(error => {
+                console.error("There was a problem with fetching status ", status);
+            })
+        }
+        fetch_auto_responder_status();
+        setInterval(fetch_auto_responder_status, 3000); // Loop refresh every 3 seconds
+    </script>
+</body>
+</html>
